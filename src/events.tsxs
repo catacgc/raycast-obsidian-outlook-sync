@@ -1,0 +1,53 @@
+import { environment, Action, ActionPanel, Detail, getSelectedFinderItems, List, showToast, getApplications, getDefaultApplication, open } from "@raycast/api";
+
+import { useEffect } from 'react';
+import * as oauth from './oauth';
+import { exec } from 'child_process';
+import * as fs from 'fs';
+import { useState } from 'react';
+import { usePromise } from "@raycast/utils";
+
+interface Message {
+  id: number,
+  subject: string,
+  link: string
+}
+
+
+export default function Command() {
+
+  const [isLoading, setLoading] = useState(true)
+  const [events, setEvents] = useState<oauth.EventResponse[]>([])
+
+  useEffect(() => {
+    (async () => {
+      oauth.getCalendarEvents()
+        .then(
+          success => setEvents(success),
+          reason => {
+            console.log(reason)
+            showToast({ title: JSON.stringify(reason) })
+          }
+        )
+        .catch(err => showToast({ title: err }))
+        .finally(() => setLoading(false))
+
+    })();
+  }, []);
+
+  return (
+    <List isLoading={isLoading} isShowingDetail>
+      {events.map(it => <List.Item
+        key={it.subject + it.start.dateTime}
+        title={it.subject}
+        detail={
+          <List.Item.Detail markdown={`
+* Attendees: *${it.attendees.map(a => a.emailAddress.name).join(", ")}*
+          `}/>
+        }
+        // subtitle={it.attendees.map(a => a.emailAddress.name).join(", ")}
+        ></List.Item>)}
+    </List>
+
+  );
+}

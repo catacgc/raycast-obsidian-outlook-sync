@@ -1,0 +1,11 @@
+on run argv
+
+    tell application "Mail"
+        set selectedMessages to selection
+        set theMessage to item 1 of selectedMessages
+        set messageid to message id of theMessage
+        set urlText to item 1 of argv
+        return urlText
+    end tell
+
+end run

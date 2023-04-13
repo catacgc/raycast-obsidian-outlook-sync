@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "outlook-inbox-zero",
+  "title": "Outlook Inbox Zero",
+  "description": "Manage outlook messages",
+  "icon": "outlook.png",
+  "author": "catacgc",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "inbox",
+      "title": "Inbox Zero",
+      "description": "Quickly cleanup inbox",
+      "mode": "view"
+    },
+    {
+      "name": "screenshot",
+      "title": "Screenshot ToDo",
+      "description": "Quick add a screenshot to a todofile",
+      "mode": "view"
+    },
+    {
+      "name": "todo",
+      "title": "Todos",
+      "description": "Show email todo list",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "todos_folder",
+      "label": "ToDos folder",
+      "title": "ToDos folder",
+      "default": "ToDo",
+      "type": "textfield",
+      "description": "What Folder to read Todos items from",
+      "required": true
+    },
+    {
+      "name": "notion_folder",
+      "label": "Notion folder",
+      "title": "Notion folder",
+      "default": "Notion",
+      "type": "textfield",
+      "description": "What Folder to store Notion items into",
+      "required": true
+    },
+    {
+      "name": "todos_folder",
+      "label": "ToDos folder",
+      "title": "ToDos folder",
+      "default": "ToDo",
+      "type": "textfield",
+      "description": "What Folder to read Todos from",
+      "required": true
+    },
+    {
+      "name": "token",
+      "title": "Notion Integration Token",
+      "required": true,
+      "label": "Integration Token",
+      "type": "password",
+      "description": "the Notion integration token"
+    },
+    {
+      "name": "db",
+      "title": "Notion Db Id",
+      "required": true,
+      "label": "Db Id",
+      "type": "textfield",
+      "description": "the notes db that needs only two properties: URL and Name"
+    }
+  ],
+  "dependencies": {
+    "@azure/identity": "^2.1.0",
+    "@microsoft/microsoft-graph-client": "^3.0.2",
+    "@notionhq/client": "^2.2.2",
+    "@raycast/api": "^1.39.1",
+    "@raycast/utils": "^1.2.0",
+    "@tryfabric/martian": "^1.2.4",
+    "axios": "^0.27.2",
+    "isomorphic-fetch": "^3.0.0",
+    "luxon": "^3.3.0",
+    "node-fetch": "^3.2.10",
+    "screencapture": "^0.3.1",
+    "turndown": "^7.1.2"
+  },
+  "devDependencies": {
+    "@microsoft/microsoft-graph-types": "^2.23.0",
+    "@types/luxon": "^3.3.0",
+    "@types/turndown": "^5.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "test": "",
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
