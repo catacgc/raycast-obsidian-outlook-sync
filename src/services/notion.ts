@@ -4,11 +4,7 @@ import {markdownToBlocks} from '@tryfabric/martian';
 import TurndownService from "turndown";
 import {ProcessedEmailMessage} from "./email";
 import {CreatePageResponse} from "@notionhq/client/build/src/api-endpoints";
-
-export interface Preferences {
-    token: string
-    db: string
-}
+import { Preferences } from "../components/emails";
 
 export default class NotionService {
 

@@ -17,6 +17,13 @@
       "mode": "view"
     },
     {
+      "name": "syncnotion",
+      "title": "Sync notion",
+      "description": "Moves any note in the Notion folder to your Notion DB",
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
       "name": "screenshot",
       "title": "Screenshot ToDo",
       "description": "Quick add a screenshot to a todofile",

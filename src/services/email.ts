@@ -35,7 +35,7 @@ export type ProcessedEmailMessage = EmailMessage & {
 }
 
 
-export type Conversations = { conversationId: string, emails: ProcessedEmailMessage[] }[]
+export type Conversation = { conversationId: string, emails: ProcessedEmailMessage[] }
 
 interface FolderResponse {
     value: {
@@ -111,10 +111,10 @@ export default class EmailService {
         return {...emailDraft.data, ...{markdownBody: this.markdown(emailDraft.data)}}
     }
 
-    async getGroupedEmail(folder: string): Promise<Conversations> {
+    async getGroupedEmail(folder: string): Promise<Conversation[]> {
         const mails = await this.getEmail(folder)
 
-        const grouped: Conversations = []
+        const grouped: Conversation[] = []
         for (const mail of mails) {
             if (!grouped.find(it => it.conversationId == mail.conversationId)) {
                 grouped.push({conversationId: mail.conversationId, emails: []})
@@ -166,14 +166,16 @@ export default class EmailService {
 
 
     markdown(it: EmailMessage) {
-        let markdown = `
+        const markdown = `
+[Email Link](${it.webLink})
+
 **${it.subject}**
 
 **From:** *${it.sender.emailAddress.name}*
 
 **To:** *${it.toRecipients.map(i => i.emailAddress.name).join(", ").substring(0, 150)}*
 
-**Date:** *${DateTime.fromISO(it.receivedDateTime).toRelative()}*
+**Date:** *${DateTime.fromISO(it.receivedDateTime)}*
 
 ---
     
@@ -186,7 +188,7 @@ export default class EmailService {
         let msg = this.turndown.turndown(it)
 
         // escape weird image tags in email messages like [![xls](cid:invalidicon) link text](link) => [link text](link)
-        msg = msg.replaceAll(/\!\[.+?\)/g, "")
+        msg = msg.replaceAll(/!\[.+?\)/g, "")
 
         // comments
         msg = msg.replaceAll(/<!--.+-->/g, "")
@@ -216,6 +218,15 @@ export default class EmailService {
         console.log(events.data)
 
         return {...events.data, ...{markdownBody: this.markdown(events.data)}}
+    }
+
+    async archiveConversation(conv: Conversation): Promise<ProcessedEmailMessage[]> {
+        const archived: ProcessedEmailMessage[] = []
+        for (const email of conv.emails) {
+            archived.push(await this.archiveMessage(email.id))
+        }
+
+        return archived
     }
 
     async archiveMessage(id: string): Promise<ProcessedEmailMessage> {

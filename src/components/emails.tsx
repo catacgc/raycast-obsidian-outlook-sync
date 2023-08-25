@@ -1,16 +1,23 @@
 import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import EmailService, { Conversations, ProcessedEmailMessage } from "../services/email";
+import EmailService, { Conversation, ProcessedEmailMessage } from "../services/email";
 import NotionService from "../services/notion";
 import SaveForm from "./saveform";
 import ReplyForm from "./replyform";
 import AiSummary from "./aisummary";
 
+export interface Preferences {
+  todos_folder: string;
+  notion_folder: string;
+  token: string
+  db: string
+}
+
 export function ListEmails(folder: string) {
 
   const { push } = useNavigation();
   const [isLoading, setLoading] = useState(true);
-  const [conversations, setConversations] = useState<Conversations>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const notion = new NotionService();
   const outlook = new EmailService();
   const preferences = getPreferenceValues<Preferences>();
@@ -152,9 +159,4 @@ export function ListEmails(folder: string) {
     </List>
 
   );
-}
-
-interface Preferences {
-  todos_folder: string;
-  notion_folder: string;
 }
