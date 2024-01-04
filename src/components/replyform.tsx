@@ -1,7 +1,5 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import EmailService, { ProcessedEmailMessage } from "../services/email";
-import { useState } from "react"
-import NotionService from "../services/notion";
 
 export default function ReplyForm({email, onFormSubmit}: { email: ProcessedEmailMessage, onFormSubmit: (msg: ProcessedEmailMessage) => void }) {
 

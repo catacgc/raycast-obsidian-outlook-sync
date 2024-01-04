@@ -1,16 +1,11 @@
-import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, getPreferenceValues, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import EmailService, { Conversation, ProcessedEmailMessage } from "../services/email";
-import NotionService from "../services/notion";
-import SaveForm from "./saveform";
-import ReplyForm from "./replyform";
-import AiSummary from "./aisummary";
 
 export interface Preferences {
   todos_folder: string;
-  notion_folder: string;
-  token: string
-  db: string
+  emailfile: string;
+  vault: string
 }
 
 export function ListEmails(folder: string) {
@@ -18,7 +13,6 @@ export function ListEmails(folder: string) {
   const { push } = useNavigation();
   const [isLoading, setLoading] = useState(true);
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const notion = new NotionService();
   const outlook = new EmailService();
   const preferences = getPreferenceValues<Preferences>();
 
@@ -57,11 +51,14 @@ export function ListEmails(folder: string) {
     setConversations(conversations.filter(it => it.conversationId != msg.conversationId));
 
     for (const msg of conversation.emails) {
-      await outlook.moveMessage(msg.id, preferences.todos_folder).finally(() => {
+      const moved = await outlook.moveMessage(msg.id, preferences.todos_folder).finally(() => {
         toast.style = Toast.Style.Success;
         toast.title = `Moved`;
         toast.message = msg.subject;
       });
+
+      await Clipboard.copy(`[Email: ${moved.subject}](${moved.webLink})`)
+      await showToast({title: "Copied todo link to clipboard", message: moved.subject})
     }
   }
 
@@ -95,31 +92,6 @@ export function ListEmails(folder: string) {
     }
   }
 
-  async function saveToNotion(msg: ProcessedEmailMessage) {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Saving to Notion"
-    });
-
-    setConversations(conversations.filter(it => it.conversationId != msg.conversationId));
-
-    toast.style = Toast.Style.Animated;
-    toast.message = "Moving to Notion email folder";
-    const email = await outlook.moveMessage(msg.id, preferences.notion_folder);
-
-    toast.style = Toast.Style.Animated;
-    toast.message = "Saving to Notion";
-    await notion.saveToInbox({ ...msg, ...{ id: email.id, webLink: email.webLink } });
-
-    toast.style = Toast.Style.Success;
-    toast.message = "Saved";
-  }
-
-  const saveForm = (it: ProcessedEmailMessage) => <SaveForm onFormSubmit={(edited) => saveToNotion(edited)}
-                                                            email={it}></SaveForm>;
-  const createDraftForm = (it: ProcessedEmailMessage) => <ReplyForm onFormSubmit={(edited) => saveToNotion(edited)}
-                                                                    email={it}></ReplyForm>;
-
   return (
     <List isLoading={isLoading} isShowingDetail enableFiltering={true}>
       {
@@ -131,17 +103,10 @@ export function ListEmails(folder: string) {
                   title="Open"
                   url={it.webLink}
                 />
-                <Action title="Save to Notion" onAction={() => push(saveForm(it))}
-                        shortcut={{ modifiers: ["ctrl"], key: "2" }} />
                 <Action title="Move to ToDo" onAction={() => toDo(it)}
                         shortcut={{ modifiers: ["ctrl"], key: "1" }} />
                 <Action title="Archive" onAction={() => archiveMessage(it)}
                         shortcut={{ modifiers: ["ctrl"], key: "e" }} />
-                <Action title="Create Draft Reply" onAction={() => push(createDraftForm(it))}
-                        shortcut={{ modifiers: ["ctrl"], key: "r" }} />
-                <Action title="Summarize"
-                        onAction={() => push(<AiSummary email={it.bodyPreview}></AiSummary>)}
-                        shortcut={{ modifiers: ["cmd"], key: "s" }} />
 
               </ActionPanel>
             }

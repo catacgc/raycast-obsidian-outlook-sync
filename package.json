@@ -11,74 +11,38 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "inbox",
-      "title": "Inbox Zero",
-      "description": "Quickly cleanup inbox",
-      "mode": "view"
-    },
-    {
-      "name": "syncnotion",
-      "title": "Sync notion",
-      "description": "Moves any note in the Notion folder to your Notion DB",
+      "name": "sync",
+      "title": "Sync Email to Obsidian",
+      "description": "Sync Email to Obsidian",
       "mode": "no-view",
-      "interval": "1m"
-    },
-    {
-      "name": "screenshot",
-      "title": "Screenshot ToDo",
-      "description": "Quick add a screenshot to a todofile",
-      "mode": "view"
-    },
-    {
-      "name": "todo",
-      "title": "Todos",
-      "description": "Show email todo list",
-      "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "todos_folder",
-      "label": "ToDos folder",
-      "title": "ToDos folder",
-      "default": "ToDo",
-      "type": "textfield",
-      "description": "What Folder to read Todos items from",
-      "required": true
-    },
-    {
-      "name": "notion_folder",
-      "label": "Notion folder",
-      "title": "Notion folder",
-      "default": "Notion",
-      "type": "textfield",
-      "description": "What Folder to store Notion items into",
-      "required": true
-    },
-    {
-      "name": "todos_folder",
-      "label": "ToDos folder",
-      "title": "ToDos folder",
-      "default": "ToDo",
-      "type": "textfield",
-      "description": "What Folder to read Todos from",
-      "required": true
-    },
-    {
-      "name": "token",
-      "title": "Notion Integration Token",
-      "required": true,
-      "label": "Integration Token",
-      "type": "password",
-      "description": "the Notion integration token"
-    },
-    {
-      "name": "db",
-      "title": "Notion Db Id",
-      "required": true,
-      "label": "Db Id",
-      "type": "textfield",
-      "description": "the notes db that needs only two properties: URL and Name"
+      "preferences": [
+        {
+          "name": "vault",
+          "label": "Obsidian Vault Path",
+          "title": "Obsidian Vault Path",
+          "type": "textfield",
+          "description": "Obsidian Vault Path Location",
+          "required": true
+        },
+        {
+          "name": "todos_folder",
+          "label": "ToDos folder",
+          "title": "ToDos folder",
+          "default": "ToDo",
+          "type": "textfield",
+          "description": "What Folder to read Todos from, comma separated",
+          "required": true
+        },
+        {
+          "name": "emailfile",
+          "label": "Email Log File",
+          "title": "Email Log File",
+          "default": "Emails.md",
+          "type": "textfield",
+          "description": "What file to write email log to",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -88,7 +52,7 @@
     "@raycast/api": "^1.39.1",
     "@raycast/utils": "^1.2.0",
     "@tryfabric/martian": "^1.2.4",
-    "axios": "^0.27.2",
+    "axios": "^1.4.0",
     "isomorphic-fetch": "^3.0.0",
     "luxon": "^3.3.0",
     "node-fetch": "^3.2.10",
