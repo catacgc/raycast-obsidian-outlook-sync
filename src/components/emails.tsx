@@ -1,15 +1,23 @@
-import { Action, ActionPanel, Clipboard, getPreferenceValues, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  getPreferenceValues,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import EmailService, { Conversation, ProcessedEmailMessage } from "../services/email";
 
 export interface Preferences {
   todos_folder: string;
-  emailfile: string;
-  vault: string
+  emailFolder: string;
+  vault: string;
 }
 
 export function ListEmails(folder: string) {
-
   const { push } = useNavigation();
   const [isLoading, setLoading] = useState(true);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -18,25 +26,24 @@ export function ListEmails(folder: string) {
 
   useEffect(() => {
     (async () => {
-
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: "Fetching emails"
+        title: "Fetching emails",
       });
 
-      outlook.getGroupedEmail(folder)
+      outlook
+        .getGroupedEmail(folder)
         .then(
-          success => {
+          (success) => {
             toast.hide();
             setConversations(success);
           },
-          reason => {
+          (reason) => {
             showToast({ title: JSON.stringify(reason) });
           }
         )
-        .catch(err => showToast({ title: err }))
+        .catch((err) => showToast({ title: err }))
         .finally(() => setLoading(false));
-
     })();
   }, []);
 
@@ -44,11 +51,11 @@ export function ListEmails(folder: string) {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: `Moving to ToDo`,
-      message: msg.subject
+      message: msg.subject,
     });
 
-    const conversation = conversations.find(it => it.conversationId == msg.conversationId);
-    setConversations(conversations.filter(it => it.conversationId != msg.conversationId));
+    const conversation = conversations.find((it) => it.conversationId == msg.conversationId);
+    setConversations(conversations.filter((it) => it.conversationId != msg.conversationId));
 
     for (const msg of conversation.emails) {
       const moved = await outlook.moveMessage(msg.id, preferences.todos_folder).finally(() => {
@@ -57,8 +64,8 @@ export function ListEmails(folder: string) {
         toast.message = msg.subject;
       });
 
-      await Clipboard.copy(`[Email: ${moved.subject}](${moved.webLink})`)
-      await showToast({title: "Copied todo link to clipboard", message: moved.subject})
+      await Clipboard.copy(`[Email: ${moved.subject}](${moved.webLink})`);
+      await showToast({ title: "Copied todo link to clipboard", message: moved.subject });
     }
   }
 
@@ -66,7 +73,7 @@ export function ListEmails(folder: string) {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: `Archiving`,
-      message: msg.subject
+      message: msg.subject,
     });
 
     return outlook.archiveMessage(msg.id).finally(() => {
@@ -80,12 +87,12 @@ export function ListEmails(folder: string) {
     await showToast({
       style: Toast.Style.Animated,
       title: `Archiving`,
-      message: msg.subject
+      message: msg.subject,
     });
 
-    const conversation = conversations.find(it => it.conversationId == msg.conversationId);
+    const conversation = conversations.find((it) => it.conversationId == msg.conversationId);
 
-    setConversations(conversations.filter(it => it.conversationId != msg.conversationId));
+    setConversations(conversations.filter((it) => it.conversationId != msg.conversationId));
 
     for (const it of conversation.emails) {
       await archive(it);
@@ -93,35 +100,29 @@ export function ListEmails(folder: string) {
   }
 
   return (
-    <List isLoading={isLoading} isShowingDetail enableFiltering={true}>
-      {
-        conversations.map(convo => convo.emails.slice(0, 1).map(it =>
+    <List isLoading={isLoading} isShowingDetail filtering={true}>
+      {conversations.map((convo) =>
+        convo.emails.slice(0, 1).map((it) => (
           <List.Item
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
-                  title="Open"
-                  url={it.webLink}
+                <Action.OpenInBrowser title="Open" url={it.webLink} />
+                <Action title="Move to ToDo" onAction={() => toDo(it)} shortcut={{ modifiers: ["ctrl"], key: "1" }} />
+                <Action
+                  title="Archive"
+                  onAction={() => archiveMessage(it)}
+                  shortcut={{ modifiers: ["ctrl"], key: "e" }}
                 />
-                <Action title="Move to ToDo" onAction={() => toDo(it)}
-                        shortcut={{ modifiers: ["ctrl"], key: "1" }} />
-                <Action title="Archive" onAction={() => archiveMessage(it)}
-                        shortcut={{ modifiers: ["ctrl"], key: "e" }} />
-
               </ActionPanel>
             }
-
             keywords={it.bodyPreview.split(" ")}
             key={it.id}
             title={it.subject}
-            detail={
-              <List.Item.Detail markdown={it.markdownBody} />
-            }
+            detail={<List.Item.Detail markdown={it.markdownBody} />}
             subtitle={convo.emails.length > 1 ? `+ ${convo.emails.length - 1} more` : ""}
-
-          ></List.Item>))
-      }
+          ></List.Item>
+        ))
+      )}
     </List>
-
   );
 }

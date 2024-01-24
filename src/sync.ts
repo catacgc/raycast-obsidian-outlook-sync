@@ -1,11 +1,7 @@
-import { getPreferenceValues, showHUD, showToast, Toast, updateCommandMetadata } from "@raycast/api";
-import Style = Toast.Style;
+import { getPreferenceValues, updateCommandMetadata } from "@raycast/api";
 import EmailService from "./services/email";
 import { Preferences } from "./components/emails";
 import { ObsidianService } from "./services/obsidian";
-import { readFile } from "node:fs/promises";
-import axios from "axios";
-import * as https from "https";
 
 export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -15,28 +11,26 @@ export default async function Command() {
 
   const obsidian = new ObsidianService(preferences);
 
-  const folders = preferences.todos_folder.split(",").map(it => it.trim());
+  const folders = preferences.todos_folder.split(",").map((it) => it.trim());
 
   for (const folder of folders) {
-    console.log(`fetching folder: ${folder}`)
+    console.log(`fetching folder: ${folder}`);
     const emails = await outlook.getGroupedEmail(folder);
+    const keep = await outlook.getMailFolderId("Keep");
 
     for (const email of emails) {
-      const archived = await outlook.archiveConversation(email);
-      const link = archived[0].webLink;
+      const archived = await outlook.moveConversation(email, keep);
       const subject = archived[0].subject;
 
       await updateCommandMetadata({ subtitle: `Sync ${subject}` });
 
       try {
-        // await obsidian.addDailyNote(`- [${subject}](${link}) #email/${folder.toLowerCase()}`);
-        await obsidian.saveEmail(`\n- [${subject}](${link}) #email/${folder.toLowerCase()} date::${archived[0].receivedDateTime}`);
+        await obsidian.saveEmailMessage(archived[0], folder);
       } catch (e) {
         console.log(e);
       }
     }
   }
-
 
   await updateCommandMetadata({ subtitle: `Synced emails to daily note` });
 }

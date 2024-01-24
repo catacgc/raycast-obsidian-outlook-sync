@@ -19,8 +19,8 @@ declare namespace Preferences {
   "vault": string,
   /** ToDos folder - What Folder to read Todos from, comma separated */
   "todos_folder": string,
-  /** Email Log File - What file to write email log to */
-  "emailfile": string
+  /** Email Folder File - What folder to write saved emails to */
+  "emailFolder": string
 }
 }
 

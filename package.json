@@ -34,12 +34,12 @@
           "required": true
         },
         {
-          "name": "emailfile",
-          "label": "Email Log File",
-          "title": "Email Log File",
-          "default": "Emails.md",
+          "name": "emailFolder",
+          "label": "Email Folder File",
+          "title": "Email Folder File",
+          "default": "Emails",
           "type": "textfield",
-          "description": "What file to write email log to",
+          "description": "What folder to write saved emails to",
           "required": true
         }
       ]

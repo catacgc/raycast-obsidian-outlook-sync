@@ -3,20 +3,83 @@ import * as https from "https";
 import { readFile } from "node:fs/promises";
 import * as fs from "fs";
 import { Preferences } from "../components/emails";
+import { ProcessedEmailMessage } from "./email";
 
 export class ObsidianService {
 
   private PATH = '.obsidian/plugins/obsidian-local-rest-api/data.json'
   private readonly configFile: string;
-  private file: string;
+  private folder: string;
 
   constructor(pref: Preferences) {
     this.configFile = `${pref.vault}/${this.PATH}`
-    this.file = `${pref.vault}/${pref.emailfile}`
+    this.folder = `${pref.vault}/${pref.emailFolder}`
+  }
+
+  private getFileSystemCompatibleName(str) {
+    // Remove special characters and replace them with an underscore
+    const sanitizedStr = str.replace(/[^a-zA-Z0-9]/g, ' ');
+    
+    // Remove leading and trailing spaces
+    const trimmedStr = sanitizedStr.trim();
+    
+    // Remove multiple consecutive spaces and replace them with a single space
+    const finalStr = trimmedStr.replace(/\s+/g, ' ');
+    
+    return finalStr;
+  }
+
+  async saveEmailMessage(email: ProcessedEmailMessage, folder: string) {
+    const link = email.webLink;
+    const subject = email.subject;
+    const date = new Date();
+
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear()
+    const day = String(date.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+
+    const contentPath = `${this.folder}/${year}/${month}`;
+    fs.mkdirSync(this.folder, {recursive: true})
+
+    fs.mkdirSync(contentPath, {recursive: true})
+    const index = `${this.folder}/Emails.md`
+
+    const slug = this.getFileSystemCompatibleName(email.subject).substring(0, 30) + `-${formattedDate}.eml`;
+
+    const isTodo = folder.toLowerCase().includes("todo") || folder.toLowerCase().includes("task");
+
+    const header = `---
+emailLink: ${link}
+created: ${formattedDate}
+from: "[[${email.sender.emailAddress.name}]]"
+tags: [email]
+---`
+
+    const todo = isTodo ? `\n\n- [ ] [${subject}](${link})` : ""
+
+    const fullMarkdown = `${header}${todo}
+
+[${email.subject}](${link})
+
+${email.markdownBody}
+    `
+
+    fs.appendFile(`${contentPath}/${slug}.md`, fullMarkdown, function (err) {
+      if (err) throw err;
+    });
+
+    const markdown = `- [ ] [[${slug}|${subject}]] [link](${link})`;
+
+    fs.appendFile(index, "\n" + markdown, function (err) {
+      if (err) throw err;
+    });
   }
 
   async saveEmail(markdown: string) {
-    fs.appendFile(this.file, markdown, function (err) {
+    const index = `${this.folder}/Emails.md`
+
+    fs.appendFile(index, markdown, function (err) {
       if (err) throw err;
     });
   }
